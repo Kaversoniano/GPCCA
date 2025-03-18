@@ -1,0 +1,142 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+## Preparation
+
+Suppose the R package `GPCCA` is correctly installed. We attach it to the environment.
+
+```{r}
+library(GPCCA)
+```
+
+Firstly, we briefly introduce the example multi-modal dataset provided by the package. 
+`example_MultiModalData_list` is a synthetic multi-modal dataset with three modalities 
+(a list that consists of 3 numeric matrices). There are six groups of samples within 
+the dataset, with ground truth labels given by `example_MultiModalData_labels`. 
+Artificial missing values are introduced, leading to an overall missing rate of 20\%.
+
+```{r}
+lbls <- example_MultiModalData_labels
+
+str(example_MultiModalData_list)
+```
+
+## Model Fit
+
+Then, we fit GPCCA model to the example multi-modal dataset. We specify the size of 
+target dimension to be `d = 5`, i.e. the number of latent factors in low-dimensional 
+subspace. The default value of ridge regularization parameter `lambda = 0.5` is used. 
+Here, we set `verbose = 0` to suppress the printing in every iteration.
+
+```{r}
+GPCCA.fit <- GPCCAmodel(X.list = example_MultiModalData_list, d = 5, lambda = 0.5, verbose = 0)
+```
+
+The backend of function `GPCCAmodel` is an EM algorithm. Once the model fitting is completed, 
+we extract the fitted latent factors, i.e. the joint low-dimensional embeddings of the 
+original multi-modal data.
+
+```{r}
+LFs <- t(GPCCA.fit$Z)
+```
+
+## Downstream Analysis
+
+Next, we attach several more packages for our downstream clustering analysis and visualizations.
+
+```{r, message = FALSE}
+library(Seurat)
+library(pdfCluster)
+library(umap)
+library(ggplot2)
+```
+
+To obtain the clustering result, we perform Louvain clustering on the joint low-dimensional embeddings learnt by GPCCA. 
+The labels of identified clusters are stored in a factor object `grps`.
+
+```{r}
+colnames(LFs) <- paste0("LF", 1:ncol(LFs))
+rownames(LFs) <- paste0("sample", 1:nrow(LFs))
+
+lc <- FindNeighbors(object = LFs, compute.SNN = TRUE, verbose = FALSE)
+lc <- FindClusters(object = lc$snn, verbose = FALSE)
+
+grps <- lc$res.0.8
+```
+
+To measure the agreement between the inferred cluster assignment and the true group labels. 
+We compute the Adjusted Rand Index (ARI) and print the confusion matrix.
+
+```{r}
+adj.rand.index(lbls, grps)
+
+table(lbls, grps)
+```
+
+## Visualization
+
+To visualize the fitted latent factors obtained by GPCCA, for example, 
+we create a scatterplot of the first two latent factors.
+
+```{r}
+par(pty = "s", xpd = TRUE, mar = c(5.1, 4.1, 4.1, 5.1))
+par(mfrow = c(1, 2))
+plot(x = LFs[, 1], y = LFs[, 2], col = grps,
+     type = "p", pch = 16, cex = 0.8, asp = 1,
+     xlab = "Latent Factor 1", ylab = "Latent Factor 2",
+     main = "Colored by \n identified clusters")
+legend("right", inset = c(-0.5, 0), title = "Cluster",
+       legend = paste0("cluster ", levels(as.factor(as.numeric(grps)))),
+       col = 1:length(grps), pch = 16, cex = 0.8)
+plot(x = LFs[, 1], y = LFs[, 2], col = factor(lbls),
+     type = "p", pch = 16, cex = 0.8, asp = 1,
+     xlab = "Latent Factor 1", ylab = "Latent Factor 2",
+     main = "Colored by \n ground truth labels")
+legend("right", inset = c(-0.5, 0), title = "Group",
+       legend = levels(factor(lbls)),
+       col = 1:6, pch = 16, cex = 0.8)
+par(mfrow = c(1, 1))
+```
+
+Furthermore, to visualize the potential of all joint low-dimensional embeddings combined, 
+we create a UMAP based on the reconstructed data representations learnt by GPCCA.
+
+```{r, message = FALSE}
+umap_out <- umap(d = LFs)
+
+plotDAT <- data.frame(UMAP1 = umap_out$layout[, 1], UMAP2 = umap_out$layout[, 2],
+                      Cluster = as.factor(paste0("cluster ", as.numeric(grps))),
+                      Group = as.factor(lbls))
+
+ggplot(plotDAT, aes(x = UMAP1, y = UMAP2, color = Cluster)) + geom_point() + theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
+  scale_color_brewer(palette = "Set1") + theme(aspect.ratio = 1) + 
+  ggtitle("Colored by identified clusters") + 
+  theme(plot.title = element_text(hjust = 0.5, size = 16),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12)) + 
+  guides(color = guide_legend(override.aes = list(size = 5)))
+
+ggplot(plotDAT, aes(x = UMAP1, y = UMAP2, color = Group)) + geom_point() + theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
+  scale_color_brewer(palette = "Set1") + theme(aspect.ratio = 1) + 
+  ggtitle("Colored by ground truth labels") + 
+  theme(plot.title = element_text(hjust = 0.5, size = 16),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12)) + 
+  guides(color = guide_legend(override.aes = list(size = 5)))
+```
+
+

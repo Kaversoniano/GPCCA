@@ -1,0 +1,15 @@
+useDynLib(GPCCA, .registration=TRUE)
+
+importFrom(Rcpp, evalCpp)
+importFrom(stats, rnorm, sd, var, cov)
+import(dplyr)
+import(Matrix)
+import(rsvd)
+import(pcaMethods)
+import(randcorr)
+
+#exportPattern("^[[:alpha:]]+")
+export(GPCCAmodel)
+export(EM_completeDAT)
+export(EM_missingDAT)
+export(EM_diagonalCOV)
