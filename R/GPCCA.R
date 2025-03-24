@@ -17,17 +17,19 @@
 #' 
 #' @section Package Functions:
 #' \itemize{
-#'   \item \code{GPCCAmodel}: The primary function to fit the GPCCA model on 
+#'   \item \code{\link{GPCCAmodel}}: The primary function to fit the GPCCA model on 
 #'     a general multi-modal dataset for end users.
-#'   \item \code{EM_completeDAT}: A specific sub-function to fit the GPCCA model on 
-#'     a complete multi-modal dataset without any missing value.
+#'   \item \code{\link{GPCCAselect}}: A built-in method of model selection on 
+#'     target dimension (hyper-parameter) for end users.
+#'   \item \code{\link{EM_completeDAT}}: A specific sub-function to fit the GPCCA model on 
+#'     a complete multi-modal dataset without any missing value. 
 #'     It can only be applied to a list of numeric matrices with no \code{NA}.
-#'   \item \code{EM_missingDAT}: A specific sub-function to fit the GPCCA model on 
-#'     a general multi-modal dataset that may contain missing values.
+#'   \item \code{\link{EM_missingDAT}}: A specific sub-function to fit the GPCCA model on 
+#'     a general multi-modal dataset that may contain missing values. 
 #'     It is capable of handling both complete data and incomplete data.
-#'   \item \code{EM_diagonalCOV}: A specific sub-function to fit the GPCCA model on 
+#'   \item \code{\link{EM_diagonalCOV}}: A specific sub-function to fit the GPCCA model on 
 #'     a general multi-modal dataset that may contain missing values, 
-#'     if the error covariance matrix is simplified to be strict diagonal.
+#'     if the error covariance matrix is simplified to be strict diagonal. 
 #'     It is only recommended for use when the total number of features 
 #'     (with all modalities combined) is extremely large.
 #' }

@@ -5,19 +5,20 @@
 #'   A sub-function invoked by the primary function \code{GPCCAmodel}. 
 #'   See \code{\link{GPCCAmodel}} for more details of the GPCCA model.
 #'
-#' @param X.list a list of numeric matrices. A multi-modal dataset where each 
-#'    matrix \eqn{\mathbf{X}^{(r)}} is a data modality, with \eqn{m_r} rows 
-#'    denoting features and \eqn{n} columns denoting samples. 
-#'    All modalities must have the same sample size \eqn{n}, with the ordering 
-#'    of samples matched to each other. Artificial modality-wise missing values 
-#'    should be introduced by the user if non-matching samples are present.
+#' @param X.list a list of numeric matrices. A multi-modal dataset of \eqn{R} 
+#'   modalities, where each matrix \eqn{\mathbf{X}^{(r)}} is a data modality, 
+#'   with \eqn{m_r} rows denoting features and \eqn{n} columns denoting samples 
+#'   (\eqn{1 \le r \le R}). All modalities must have the same sample size \eqn{n}, 
+#'   with the ordering of samples matched to each other. Artificial modality-wise 
+#'   missing values should be introduced by the user if non-matching samples are present.
 #' @param d an integer. The size of target dimension \eqn{d}, i.e. the number of 
 #'   latent factors in low-dimensional subspace. (Default: \code{2})
 #' @param lambda a numeric scalar. The ridge regularization parameter \eqn{\lambda}, 
 #'   in the range of \eqn{(0, 1]}. A smaller \eqn{\lambda} corresponds to heavier 
 #'   penalty, which leads to a more sparse (diagonal-like) structure of the 
-#'   error covariance matrix \eqn{\mathbf{\Psi}}. In the extreme case, \eqn{\lambda = 1} 
-#'   means no ridge regularization is applied. (Default: \code{0.5})
+#'   error covariance matrix \eqn{\mathbf{\Psi}}. In the extreme case, 
+#'   \eqn{\lambda = 1} means no ridge regularization is applied. 
+#'   It affects nothing if \code{diagCov = TRUE}. (Default: \code{0.5})
 #' @param tol a numeric scalar. Tolerance of the RMSE measuring the difference 
 #'   in the matrix of latent factors \eqn{\mathbf{Z}} between two consecutive 
 #'   iterations. This tolerance threshold \eqn{\tau} determines the stopping rule 
@@ -32,10 +33,11 @@
 #'   to decide for early stop. It affects nothing if \code{EarlyStop = FALSE}. 
 #'   (Default: \code{5})
 #' @param force_blkInv a logical. Should blockwise inversion of the error 
-#'   covariance matrix \eqn{\mathbf{\Psi}} be activated? It is automatically 
-#'   turned on if either the dimension of any data modality \eqn{m_r} is larger 
-#'   than \eqn{500} or the total dimension \eqn{m = \sum_{r=1}^{R}m_r} is larger 
-#'   than \eqn{1000}. (Default: \code{FALSE})
+#'   covariance matrix \eqn{\mathbf{\Psi}} be activated? A technique to boost 
+#'   computation. It is automatically turned on if either the dimension of any 
+#'   data modality \eqn{m_r} is larger than \eqn{500} or the total dimension 
+#'   \eqn{m = \sum_{r=1}^{R}m_r} is larger than \eqn{1000}. 
+#'   It affects nothing if \code{diagCov = TRUE}. (Default: \code{FALSE})
 #' @param W.init One of \code{"PCA"} and \code{"rand.std.norm"}, 
 #'   indicating which method is used for initializing the loading matrix 
 #'   \eqn{\mathbf{W}}. \code{"rand.std.norm"} initializes all elements of 
@@ -67,8 +69,11 @@
 #' @examples
 #' \dontrun{
 #' 
-#' ## Fit GPCCA model to the example multi-modal data
-#' GPCCA.fit <- EM_completeDAT(X.list = example_MultiModalData_list, d = 5, lambda = 0.5)
+#' ## Fit GPCCA model to the complete example multi-modal dataset
+#' GPCCA.fit <- EM_completeDAT(X.list = example_MultiModalData_list0,
+#'                             d = 4, lambda = 0.5)
+#'                             
+#' ## Extract the fitted latent factors
 #' LFs <- t(GPCCA.fit$Z)
 #' 
 #' ## Data visualization
@@ -114,9 +119,9 @@ EM_completeDAT <- function(X.list, d = 2, lambda = 0.5, tol = 0.0001, maxiter = 
       ms.index[[j]] <- L.index[j]:U.index[j]
     }
     
-    if (verbose) print("Blockwise inversion of the error covariance matrix is activated.")
+    message("Blockwise inversion of the error covariance matrix is enabled.")
   } else {
-    if (verbose) print("Blockwise inversion of the error covariance matrix is disabled.")
+    message("Blockwise inversion of the error covariance matrix is disabled.")
   }
   
   ### Parameter Initialization (recommended)
@@ -202,8 +207,8 @@ EM_completeDAT <- function(X.list, d = 2, lambda = 0.5, tol = 0.0001, maxiter = 
     t.dfs <- c(t.dfs, t.df)
     
     if (verbose) {
-      print(paste0("Iteration ", iter, " takes ", round(as.numeric(t.df, units = "secs"), 3), "s",
-                   " with RMSE ", round(RMSE, 8)))
+      cat(paste0("Iteration ", iter, " takes ", round(as.numeric(t.df, units = "secs"), 4), "s",
+                 " with RMSE ", round(RMSE, 8)), "\n")
     }
     
     gc()

@@ -17,12 +17,12 @@ EM_diagonalCOV(
 )
 }
 \arguments{
-\item{X.list}{a list of numeric matrices. A multi-modal dataset where each 
-matrix \eqn{\mathbf{X}^{(r)}} is a data modality, with \eqn{m_r} rows 
-denoting features and \eqn{n} columns denoting samples. 
-All modalities must have the same sample size \eqn{n}, with the ordering 
-of samples matched to each other. Artificial modality-wise missing values 
-should be introduced by the user if non-matching samples are present.}
+\item{X.list}{a list of numeric matrices. A multi-modal dataset of \eqn{R} 
+modalities, where each matrix \eqn{\mathbf{X}^{(r)}} is a data modality, 
+with \eqn{m_r} rows denoting features and \eqn{n} columns denoting samples 
+(\eqn{1 \le r \le R}). All modalities must have the same sample size \eqn{n}, 
+with the ordering of samples matched to each other. Artificial modality-wise 
+missing values should be introduced by the user if non-matching samples are present.}
 
 \item{d}{an integer. The size of target dimension \eqn{d}, i.e. the number of 
 latent factors in low-dimensional subspace. (Default: \code{2})}
@@ -79,15 +79,18 @@ Implementation of Generalized Probabilistic Canonical Correlation Analysis (GPCC
   error covariance matrix \eqn{\mathbf{\Psi}} is assumed to be strict diagonal. 
   It is recommended for use when the total dimension of data (with all 
   modalities combined) is extremely high. In this case, ridge regularization 
-  is disabled, without needing to specify the value of \eqn{\lambda}. 
+  is not applied, without needing to specify the value of \eqn{\lambda}. 
   A sub-function invoked by the primary function \code{GPCCAmodel}. 
   See \code{\link{GPCCAmodel}} for more details of the GPCCA model.
 }
 \examples{
 \dontrun{
 
-## Fit GPCCA model to the example multi-modal data
-GPCCA.fit <- EM_diagonalCOV(X.list = example_MultiModalData_list, d = 5, lambda = 0.5)
+## Fit GPCCA model to the incomplete example multi-modal dataset
+GPCCA.fit <- EM_diagonalCOV(X.list = example_MultiModalData_list1,
+                            d = 4)
+                            
+## Extract the fitted latent factors
 LFs <- t(GPCCA.fit$Z)
 
 ## Data visualization

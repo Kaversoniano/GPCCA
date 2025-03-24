@@ -5,17 +5,19 @@
 \alias{example_MultiModalData_labels}
 \title{Ground Truth Labels of Example Multi-modal Dataset}
 \format{
-A character vector that consists of 100 \code{group 1}, 
-100 \code{group 2}, ... , 100 \code{group 6} in order.
+A character vector that consists of 50 \code{"group 1"}, 
+50 \code{"group 2"}, ... , 50 \code{"group 6"} in order.
 }
 \usage{
 example_MultiModalData_labels
 }
 \description{
 Ground truth sample labels of the synthetic multi-modal dataset given by 
-\code{example_MultiModalData_list}.
+\code{example_MultiModalData_list0} (complete) or 
+\code{example_MultiModalData_list1} (incomplete).
 }
 \seealso{
-\code{\link{example_MultiModalData_list}}
+\code{\link{example_MultiModalData_list0}}, 
+         \code{\link{example_MultiModalData_list1}}
 }
 \keyword{datasets}

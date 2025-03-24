@@ -11,14 +11,15 @@ Description: Implementation of Generalized Probabilistic Canonical Correlation
   classic probabilistic CCA (PCCA), and it generalizes PCCA from two to more 
   than two modalities. GPCCA can handle incomplete data with various patterns 
   of missing values.
-License: GPL (>= 2)
+License: GPL (>= 3)
 Encoding: UTF-8
 Depends: R (>= 4.0)
-Imports: Rcpp (>= 1.0), stats, dplyr, Matrix, rsvd, pcaMethods, randcorr
-Suggests: Seurat, pdfCluster, umap, ggplot2, knitr, rmarkdown
+Imports: Rcpp (>= 1.0), stats, dplyr, Matrix, rsvd, pcaMethods, randcorr, 
+  Seurat, diceR, parallel
+Suggests: pdfCluster, umap, ggplot2, knitr, rmarkdown
 LinkingTo: Rcpp, RcppArmadillo
-URL: <placeholder>
-BugReports: <placeholder>
+URL: https://github.com/Kaversoniano/GPCCA
+BugReports: https://github.com/Kaversoniano/GPCCA
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 LazyData: true
