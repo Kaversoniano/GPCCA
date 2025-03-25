@@ -1,8 +1,8 @@
 ---
-title: "A Tutorial of GPCCA"
-output: pdf_document
+title: "A Tutorial of GPCCA Implementation"
+output: html_document
 vignette: >
-  %\VignetteIndexEntry{A Tutorial of GPCCA}
+  %\VignetteIndexEntry{A Tutorial of GPCCA Implementation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
