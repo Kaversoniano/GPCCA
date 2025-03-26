@@ -49,11 +49,12 @@ str(example_MultiModalData_list1) # incomplete
 
 ### 2 Model Fit
 
-Then, we fit GPCCA model to the incomplete example multi-modal dataset. We specify 
-the size of target dimension to be `d = 4`, i.e. the number of latent factors 
-in low-dimensional subspace. The default value of ridge regularization parameter 
-`lambda = 0.5` is used. Here, we set `verbose = 0` to suppress the printing in every iteration. 
-By default, setting `plot_RMSE = TRUE` generates a plot that helps us monitor the convergence.
+Then, we fit GPCCA model to the incomplete example multi-modal dataset using the 
+primary function `GPCCAmodel`. We specify the size of target dimension to be `d = 4`, 
+i.e. the number of latent factors in low-dimensional subspace. The default value of 
+ridge regularization parameter `lambda = 0.5` is used. Here, we set `verbose = 0` to 
+suppress the printing in every iteration. By default, setting `plot_RMSE = TRUE` 
+generates a plot that helps us monitor the convergence.
 
 ```{r}
 GPCCA.fit <- GPCCAmodel(X.list = example_MultiModalData_list1,
@@ -65,7 +66,7 @@ The backend of function `GPCCAmodel` is an EM algorithm. Once the model fitting 
 we extract the fitted latent factors to `LFs`, i.e. the joint low-dimensional embeddings of 
 the original multi-modal data. The resulting projections extracted can be directly used for 
 any downstream analysis of users' preference. We will perform an example clustering analysis 
-along with data visualizations a bit later.
+along with data visualizations in the next section.
 
 ```{r}
 LFs <- t(GPCCA.fit$Z)
@@ -98,8 +99,8 @@ lc <- FindClusters(object = lc$snn, verbose = FALSE)
 grps <- lc$res.0.8
 ```
 
-To measure the agreement between the inferred cluster assignment and the true group labels. 
-We compute the Adjusted Rand Index (ARI) and print the confusion matrix.
+To measure the agreement between the inferred cluster assignment and the true group labels, 
+we compute the Adjusted Rand Index (ARI) and print the confusion matrix.
 
 ```{r}
 adj.rand.index(lbls, grps)
@@ -157,24 +158,41 @@ ggplot(plotDAT, aes(x = UMAP1, y = UMAP2, color = Group)) + geom_point() + theme
 
 ### 4 Model Selection
 
-select the target dimension for GPCCA model on incomplete data...
+**Note:** 
+*R codes in this section are not evaluated because parallel computing is involved. 
+For the purpose of vignette building, it is time-consuming to run all of them and 
+the number of cores to use differs by system.*
+
+As we see in the usage of `GPCCAmodel` function, GPCCA involves two hyper-parameters: 
+the size of target dimension `d` and the ridge regularization parameter `lambda`.
+
+For the size of target dimension (the number of latent factors), `GPCCAselect` 
+provides a built-in method for selecting the best `d` given a set of candidates `d.set`. 
+For instance, we perform model selection on the complete example multi-modal dataset, 
+based on candidate values `c(2, 4, 6, 8, 10)`.
 
 ```{r, eval = FALSE}
-GPCCA.ds <- GPCCAselect(X.list = example_MultiModalData_list1,
-                        d.set = c(2, 4, 6, 8, 10),
+GPCCA.ds <- GPCCAselect(X.list = example_MultiModalData_list0,
+                        d.set = c(2, 4, 6, 8, 10), missVal = FALSE,
                         B = 5, seed = 1234, N.cores = 5)
 ```
 
-consensus scores of varying target dimensions...
+Since the input data is known to contain no missing value, setting `missVal = FALSE` 
+can reduce running time significantly. By default, the number of different initializations 
+to be used for model selection is set as `B = 5`. `seed` is just the seed for the 
+random number generator, and you may consider fixing it for exact reproduction of results. 
+`N.cores` is the number of cores to use for parallel computing, which must be `1` on Windows. 
+Here we set `N.cores = 5` that is equal to the number of initializations `B = 5`.
 
-```{r, eval = FALSE}
-GPCCA.ds$consensus.score
-```
-
-the optimal choice(s) of target dimension...
+As a result, the optimal choice(s) of the target dimension can be obtained as follows.
 
 ```{r, eval = FALSE}
 GPCCA.ds$optim.d
 ```
+
+For the ridge regularization parameter, the default value `lambda = 0.5` leads to 
+good performance in general, but there is no built-in method for selecting `lambda` 
+due to the unsupervised nature of GPCCA. Users may need to use a customized measure 
+of performance and find its optimal value adaptively.
 
 
