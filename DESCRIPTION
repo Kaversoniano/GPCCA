@@ -1,8 +1,8 @@
 Package: GPCCA
 Type: Package
 Title: Generalized Probabilistic Canonical Correlation Analysis
-Version: 1.0
-Date: 2025-02-28
+Version: 1.1
+Date: 2025-08-15
 Author: Tianjian Yang, Wei Vivian Li
 Maintainer: Tianjian Yang <tyang115@ucr.edu>
 Description: Implementation of Generalized Probabilistic Canonical Correlation 
