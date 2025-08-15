@@ -35,13 +35,14 @@ For simplicity, we assign the ground truth sample labels to `lbls`.
 lbls <- example_MultiModalData_labels
 ```
 
-Here, we use the function `example_MultiModalData_labels` to generate 
+Here, we use the function `example_MultiModalData_sim` to generate 
 the following two example datasets.
 
 * `DAT0`: the dataset is complete with no missing value.
 * `DAT1`: artificial missing values are introduced with MCAR mechanism.
 
 ```{r}
+set.seed(1234)
 DAT0 <- example_MultiModalData_sim(missVal = FALSE) # complete
 DAT1 <- example_MultiModalData_sim(missVal = TRUE) # incomplete
 ```
