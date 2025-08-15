@@ -1,0 +1,205 @@
+---
+title: "A Tutorial of GPCCA Implementation"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{A Tutorial of GPCCA Implementation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+### 1 Data Preparation
+
+Suppose the R package `GPCCA` is correctly installed. We attach it to the environment.
+
+```{r}
+library(GPCCA)
+```
+
+Firstly, we briefly introduce the package function `example_MultiModalData_sim` 
+for generating example multi-modal datasets. 
+It simulates a synthetic multi-modal dataset with three modalities. 
+There are six groups of samples within the simulated dataset, 
+with ground truth labels given by `example_MultiModalData_labels`.
+
+For simplicity, we assign the ground truth sample labels to `lbls`.
+
+```{r}
+lbls <- example_MultiModalData_labels
+```
+
+Here, we use the function `example_MultiModalData_labels` to generate 
+the following two example datasets.
+
+* `DAT0`: the dataset is complete with no missing value.
+* `DAT1`: artificial missing values are introduced with MCAR mechanism.
+
+```{r}
+DAT0 <- example_MultiModalData_sim(missVal = FALSE) # complete
+DAT1 <- example_MultiModalData_sim(missVal = TRUE) # incomplete
+```
+
+And we browse the structure of both example datasets (a list that consists of 3 numeric matrices).
+
+```{r}
+str(DAT0) # complete
+str(DAT1) # incomplete
+```
+
+
+### 2 Model Fit
+
+Then, we fit GPCCA model to the incomplete example multi-modal dataset using the 
+primary function `GPCCAmodel`. We specify the size of target dimension to be `d = 4`, 
+i.e. the number of latent factors in low-dimensional subspace. The default value of 
+ridge regularization parameter `lambda = 0.5` is used. Here, we set `verbose = 0` to 
+suppress the printing in every iteration. By default, setting `plot_RMSE = TRUE` 
+generates a plot that helps us monitor the convergence.
+
+```{r}
+GPCCA.fit <- GPCCAmodel(X.list = DAT1,
+                        d = 4, lambda = 0.5,
+                        verbose = 0, plot_RMSE = TRUE)
+```
+
+The backend of function `GPCCAmodel` is an EM algorithm. Once the model fitting is completed, 
+we extract the fitted latent factors to `LFs`, i.e. the joint low-dimensional embeddings of 
+the original multi-modal data. The resulting projections extracted can be directly used for 
+any downstream analysis of users' preference. We will perform an example clustering analysis 
+along with data visualizations in the next section.
+
+```{r}
+LFs <- t(GPCCA.fit$Z)
+```
+
+
+### 3 Downstream Analysis
+
+Next, we attach several more packages for our downstream clustering analysis and visualizations.
+
+```{r, message = FALSE}
+library(Seurat)
+library(pdfCluster)
+library(umap)
+library(ggplot2)
+```
+
+#### 3.1 Clustering Analysis
+
+To obtain the clustering result, we perform Louvain clustering on the joint low-dimensional embeddings learnt by GPCCA. 
+The labels of identified clusters are stored in a factor object `grps`.
+
+```{r}
+colnames(LFs) <- paste0("LF", 1:ncol(LFs))
+rownames(LFs) <- paste0("sample", 1:nrow(LFs))
+
+lc <- FindNeighbors(object = LFs, compute.SNN = TRUE, verbose = FALSE)
+lc <- FindClusters(object = lc$snn, verbose = FALSE)
+
+grps <- lc$res.0.8
+```
+
+To measure the agreement between the inferred cluster assignment and the true group labels, 
+we compute the Adjusted Rand Index (ARI) and print the confusion matrix.
+
+```{r}
+adj.rand.index(lbls, grps)
+
+table(lbls, grps)
+```
+
+#### 3.2 Visualization
+
+To visualize the fitted latent factors obtained by GPCCA, for example, 
+we create a scatterplot of the first two latent factors.
+
+```{r}
+par(pty = "s")
+par(mfrow = c(1, 2))
+plot(x = LFs[, 1], y = LFs[, 2], col = grps,
+     type = "p", pch = 16, cex = 0.8, asp = 1,
+     xlab = "Latent Factor 1", ylab = "Latent Factor 2",
+     main = "Colored by \n identified clusters")
+plot(x = LFs[, 1], y = LFs[, 2], col = factor(lbls),
+     type = "p", pch = 16, cex = 0.8, asp = 1,
+     xlab = "Latent Factor 1", ylab = "Latent Factor 2",
+     main = "Colored by \n ground truth labels")
+```
+
+Furthermore, to visualize the potential of all joint low-dimensional embeddings combined, 
+we create a UMAP based on the reconstructed data representations learnt by GPCCA.
+
+```{r, message = FALSE}
+umap_out <- umap(d = LFs)
+
+plotDAT <- data.frame(UMAP1 = umap_out$layout[, 1], UMAP2 = umap_out$layout[, 2],
+                      Cluster = as.factor(paste0("cluster ", as.numeric(grps))),
+                      Group = as.factor(lbls))
+
+ggplot(plotDAT, aes(x = UMAP1, y = UMAP2, color = Cluster)) + geom_point() + theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
+  scale_color_brewer(palette = "Set1") + theme(aspect.ratio = 1) + 
+  ggtitle("Colored by identified clusters") + 
+  theme(plot.title = element_text(hjust = 0.5, size = 16),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12)) + 
+  guides(color = guide_legend(override.aes = list(size = 5)))
+
+ggplot(plotDAT, aes(x = UMAP1, y = UMAP2, color = Group)) + geom_point() + theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
+  scale_color_brewer(palette = "Set1") + theme(aspect.ratio = 1) + 
+  ggtitle("Colored by ground truth labels") + 
+  theme(plot.title = element_text(hjust = 0.5, size = 16),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12)) + 
+  guides(color = guide_legend(override.aes = list(size = 5)))
+```
+
+
+### 4 Model Selection
+
+**Note:** 
+*R codes in this section are not evaluated because parallel computing is involved. 
+For the purpose of vignette building, it is time-consuming to run all of them and 
+the number of cores to use differs by system.*
+
+As we see in the usage of `GPCCAmodel` function, GPCCA involves two hyper-parameters: 
+the size of target dimension `d` and the ridge regularization parameter `lambda`.
+
+For the size of target dimension (the number of latent factors), `GPCCAselect` 
+provides a built-in method for selecting the best `d` given a set of candidates `d.set`. 
+For instance, we perform model selection on the complete example multi-modal dataset, 
+based on candidate values `c(2, 4, 6, 8, 10)`.
+
+```{r, eval = FALSE}
+GPCCA.ds <- GPCCAselect(X.list = DAT0,
+                        d.set = c(2, 4, 6, 8, 10), missVal = FALSE,
+                        B = 5, seed = 1234, N.cores = 5)
+```
+
+Since the input data is known to contain no missing value, setting `missVal = FALSE` 
+can reduce runtime significantly. By default, the number of different initializations 
+to be used for model selection is set as `B = 5`. `seed` is just the seed for the 
+random number generator, and you may consider fixing it for exact reproduction of results. 
+`N.cores` is the number of cores to use for parallel computing, which must be `1` on Windows. 
+Here we set `N.cores = 5` that is equal to the number of initializations `B = 5`.
+
+As a result, the optimal choice(s) of the target dimension can be obtained as follows.
+
+```{r, eval = FALSE}
+GPCCA.ds$optim.d
+```
+
+For the ridge regularization parameter, the default value `lambda = 0.5` leads to 
+good performance in general, but there is no built-in method for selecting `lambda` 
+due to the unsupervised nature of GPCCA. Users may need to use a customized measure 
+of performance and find its optimal value adaptively.
+
+
