@@ -1,9 +1,12 @@
 Package: GPCCA
 Type: Package
 Title: Generalized Probabilistic Canonical Correlation Analysis
-Version: 1.1
+Version: 1.0
 Date: 2025-08-15
 Author: Tianjian Yang, Wei Vivian Li
+Authors@R: c(
+    person("Tianjian", "Yang", email = "tyang115@ucr.edu", role = c("aut", "cre")),
+    person("Wei Vivian", "Li", email = "weil@ucr.edu", role = "aut"))
 Maintainer: Tianjian Yang <tyang115@ucr.edu>
 Description: Implementation of Generalized Probabilistic Canonical Correlation 
   Analysis (GPCCA) on multi-modal dataset. GPCCA is a probabilistic framework 
