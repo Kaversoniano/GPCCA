@@ -5,7 +5,7 @@ Version: 1.0
 Date: 2025-08-15
 Authors@R: c(
     person("Tianjian", "Yang", email = "tyang115@ucr.edu", role = c("aut", "cre")),
-    person("Wei Vivian", "Li", email = "weil@ucr.edu", role = "aut"))
+    person("Wei Vivian", "Li", email = "weil@ucr.edu", role = c("aut", "cph")))
 Maintainer: Tianjian Yang <tyang115@ucr.edu>
 Description: Implementation of Generalized Probabilistic Canonical Correlation 
   Analysis (GPCCA) on multi-modal dataset. GPCCA is a probabilistic framework 
@@ -21,7 +21,7 @@ Imports: Rcpp (>= 1.0), stats, MASS, dplyr, Matrix, rsvd, pcaMethods, randcorr,
 Suggests: pdfCluster, umap, ggplot2, knitr, rmarkdown
 LinkingTo: Rcpp, RcppArmadillo
 URL: https://github.com/Kaversoniano/GPCCA
-BugReports: https://github.com/Kaversoniano/GPCCA
+BugReports: https://github.com/Kaversoniano/GPCCA/issues
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 LazyData: true
