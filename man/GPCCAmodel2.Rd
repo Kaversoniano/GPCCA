@@ -166,19 +166,23 @@ For high-dimensional data, feature selection is strongly recommended so that
 
 ## I: Fit GPCCA-Pois model to the incomplete example multi-modal dataset
 DAT <- example_MultiModalData_sim(dataType = "count", missVal = TRUE)
-GPCCA.fit <- GPCCAmodel2(Y.list = DAT, d = 4, lambda = 0.1)
+GPCCA.fit <- GPCCAmodel2(Y.list = DAT, dataType = "count",
+                         d = 4, lambda = 0.1)
 
 ## II: Fit GPCCA-Pois model to the complete example multi-modal dataset
 DAT <- example_MultiModalData_sim(dataType = "count", missVal = FALSE)
-GPCCA.fit <- GPCCAmodel2(Y.list = DAT, d = 4, lambda = 0.1, missVal = FALSE)
+GPCCA.fit <- GPCCAmodel2(Y.list = DAT, dataType = "count",
+                         d = 4, lambda = 0.1, missVal = FALSE)
 
 ## III: Fit GPCCA-Bern model to the incomplete example multi-modal dataset
 DAT <- example_MultiModalData_sim(dataType = "binary", missVal = TRUE)
-GPCCA.fit <- GPCCAmodel2(Y.list = DAT, d = 4, lambda = 0.1)
+GPCCA.fit <- GPCCAmodel2(Y.list = DAT, dataType = "binary",
+                         d = 4, lambda = 0.1)
 
 ## IV: Fit GPCCA-Bern model to the complete example multi-modal dataset
 DAT <- example_MultiModalData_sim(dataType = "binary", missVal = FALSE)
-GPCCA.fit <- GPCCAmodel2(Y.list = DAT, d = 4, lambda = 0.1, missVal = FALSE)
+GPCCA.fit <- GPCCAmodel2(Y.list = DAT, dataType = "binary",
+                         d = 4, lambda = 0.1, missVal = FALSE)
 
 ## Extract the fitted latent factors
 LFs <- t(GPCCA.fit$Z)
