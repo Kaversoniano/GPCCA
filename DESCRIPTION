@@ -3,7 +3,6 @@ Type: Package
 Title: Generalized Probabilistic Canonical Correlation Analysis
 Version: 1.0
 Date: 2025-08-15
-Author: Tianjian Yang, Wei Vivian Li
 Authors@R: c(
     person("Tianjian", "Yang", email = "tyang115@ucr.edu", role = c("aut", "cre")),
     person("Wei Vivian", "Li", email = "weil@ucr.edu", role = "aut"))
