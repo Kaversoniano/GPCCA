@@ -38,7 +38,7 @@ GPCCA is an extension of the probabilistic CCA (PCCA) with several key merits:
 Useful links:
 \itemize{
   \item \url{https://github.com/Kaversoniano/GPCCA}
-  \item Report bugs at \url{https://github.com/Kaversoniano/GPCCA}
+  \item Report bugs at \url{https://github.com/Kaversoniano/GPCCA/issues}
 }
 
 }
